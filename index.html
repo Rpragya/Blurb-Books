@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>BLURB -know more about your books</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+     
+    <link rel="stylesheet" href="style.css">
+    <script src="/SearchString.js"></script>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  </head>
+  <body>
+      <div class="container">
+        <div class="row">
+            <!-- Main Content Area -->
+            <div class="col-md-8">
+            <img src="blurblogo.png.jpg" class="responsive">
+            <div class="col-md-6">
+              <h1 class="main-heading">BLURB</h1>
+              <h2>Discover your Books</h2>
+          </div>
+             <div class="card mb-4">
+                <h3 class="card-header" id="fileName">Book Title</h3>
+                <div class="card-body">
+                    <div class="displayBox scroll-box" id="fileContent">
+                      Select a book on the right  
+                    </div>
+                </div>
+                <div class="card-footer text-muted">
+                    <a href="https://www.linkedin.com/in/pragya-rai-5096a21b1"
+                    target="_blank"> Reach out to me </a>
+                </div>
+             </div>
+        </div>
+            <!-- Side bar content -->
+            <div class="col-md-4">
+              <!-- Search widget   -->
+              <div class="card my-4">
+                <h5 class="card-header">Search</h5>
+                <div class="card-body">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="keyword" placeholder="Search for...">
+                        <span class="input-group-btn">
+                            <button class="btn btn-secondary" type="button" onclick="performMark()" >Search</button>
+                        </span>
+                        
+                    </div>
+                </div>
+                <div class="card-footer" id="searchstat"></div>
+              </div>
+              <!-- Select a book widget -->
+              <div class="card my-4">
+              <h5 class="card-header">Select a Book</h5>
+              <div class="card-body" >
+                <div class="row">
+                    <div class="col-md-12">
+                        <ul class="list-unstyled mb-0">
+                           <li> <a href="#" onclick="loadBook('harrypotter.txt', 'Harry Potter')">Harry Potter</a> </li>
+                           <li> <a href="#" onclick="loadBook('SherlockHolmes.txt', 'Sherlock Holmes')"> Sherlock Homes</a></li>
+                           <li> <a href="#" onclick="loadBook('PrideandPrejudice.txt', 'Pride and Prejudice')"> Pride and Prejudice</a></li>
+                        </ul>
+                    </div>
+                </div>
+              </div>
+              </div>
+              <!-- Most Used Words -->
+              <div class="card my-4">
+                <h5 class="card-header"> Most Used Words </h5>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <ul class="list-unstyled mb-0" id="mostUsed">
+
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+              </div>
+              <!-- Least Used Word -->
+              <div class="card my-4">
+                <h5 class="card-header"> Least Used Words </h5>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <ul class="list-unstyled mb-0" id="leastUsed">
+
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+              </div>
+              <script id="teplate-ul-items" type="text/template">
+                <li>
+                  {{val}}
+                </li>
+
+              </script>
+
+              <!-- Document Stats -->
+              <div class="card my-4">
+                <h5 class="card-header"> Document Stats </h5>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <ul class="list-unstyled mb-0">
+                                <li id="docLength"></li>
+                                <li id="wordCount"></li>
+                                <li id="charCount"></li>
+                                
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+      </div>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  </body>
+</html>
