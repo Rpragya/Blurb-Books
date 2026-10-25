@@ -1,0 +1,76 @@
+/*
+ * Design tokens. One accent (the Blurb violet from the original logo
+ * gradient), warm ivory surfaces and deep ink text. Status colours are always
+ * paired with an icon and words — never colour alone.
+ */
+:root {
+  --paper: #fbf7ef;
+  --paper-2: #f4ede0;
+  --paper-3: #ebe2d1;
+  --card: #fffdf8;
+  --ink: #1d1a26;
+  --ink-2: #464152;
+  --ink-3: #686273;
+  --line: #e2d8c6;
+  --line-strong: #c9bca5;
+
+  --accent: #4b1fa0;
+  --accent-hover: #3c1682;
+  --accent-ink: #ffffff;
+  --accent-soft: #efe8fb;
+  --accent-line: #cdbcf0;
+
+  --ok: #1d6a43;
+  --ok-soft: #e2f1e7;
+  --warn: #855400;
+  --warn-soft: #fbefd3;
+  --danger: #a2281f;
+  --danger-soft: #fbe4e0;
+  --info: #285a85;
+  --info-soft: #e3eef8;
+  --neutral-soft: #ece6dc;
+
+  --font-display: 'Fraunces Variable', 'Iowan Old Style', Georgia, serif;
+  --font-body: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --step--1: clamp(0.8rem, 0.78rem + 0.1vw, 0.875rem);
+  --step-0: clamp(0.95rem, 0.92rem + 0.15vw, 1.0625rem);
+  --step-1: clamp(1.1rem, 1.05rem + 0.3vw, 1.3rem);
+  --step-2: clamp(1.35rem, 1.2rem + 0.6vw, 1.75rem);
+  --step-3: clamp(1.7rem, 1.4rem + 1.3vw, 2.6rem);
+  --step-4: clamp(2.2rem, 1.6rem + 2.6vw, 3.8rem);
+
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --s-8: 72px;
+
+  --r-1: 6px;
+  --r-2: 10px;
+  --r-3: 16px;
+  --r-pill: 999px;
+
+  --tap: 48px;
+  --shadow-1: 0 1px 2px rgb(40 28 10 / 0.06), 0 1px 1px rgb(40 28 10 / 0.04);
+  --shadow-2: 0 6px 20px rgb(40 28 10 / 0.1), 0 2px 6px rgb(40 28 10 / 0.06);
+  --shadow-3: 0 24px 60px rgb(30 20 5 / 0.22);
+  --focus: 0 0 0 3px var(--paper), 0 0 0 6px var(--accent);
+
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --dur-1: 120ms;
+  --dur-2: 220ms;
+
+  --content: 1240px;
+  color-scheme: light;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-1: 0ms;
+    --dur-2: 0ms;
+  }
+}
