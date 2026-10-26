@@ -125,7 +125,22 @@ The business rules live in `src/domain/circulation.ts`. The mock adapter runs ea
 
 ### Design
 
-The design uses warm ivory surfaces, deep ink text and one accent colour: the violet from the original Blurb logo gradient. Headings use Fraunces and body text uses Inter, both self-hosted through `@fontsource` so they work offline. Covers are generated with SVG and type, so there are no broken images or licensing questions. The workspace uses the same tokens at a denser rhythm, with worklists instead of charts.
+The public site follows an editorial reference: full-bleed library photography, clean sans headlines (Inter) with a serif italic accent word (Fraunces), squarer controls, and covers as the main visual. One accent colour runs through everything: the Blurb violet. Fonts are self-hosted through `@fontsource`, so they work offline. Book covers are generated from SVG and type, so there are no broken images or licensing questions. The librarian workspace uses the same tokens at a denser rhythm, with worklists instead of charts.
+
+**Light and dark themes.** Every colour is a semantic token in `src/styles/tokens.css`, defined once for light and once for dark. The theme follows the OS setting until the reader uses the toggle in the header or staff bar. The choice is stored and applied before first paint by an inline script in `index.html`, so there's no flash. Where the View Transitions API exists, the new theme spreads in a circle from the toggle. The accent has two roles, `--accent` for text and `--accent-fill` for solid buttons, so both pass contrast in both themes.
+
+**Motion** (`framer-motion`, primitives in `src/ui/motion.tsx`):
+- **Landing:** the hero photo moves slower than the page, the headline rises in word by word, and the hero content fades out as you scroll.
+- **Sections:** reveal as they scroll in, with staggered cards and parallax inside the genre photos.
+- **Covers:** follow the pointer with a 3D tilt.
+- **Mood rows:** two rows of mood links drift in opposite directions and pause on hover or focus.
+- **Catalogue:** cards glide to their new positions when filters change.
+- **Shelf map:** the dotted route draws itself from "You are here" to the rack, which pulses.
+- **Navigation:** pages fade in on route change, and the header hides while scrolling down and returns on scroll up.
+
+Nothing waits on an animation to become usable. With `prefers-reduced-motion`, `MotionConfig reducedMotion="user"` plus explicit checks turn off parallax, tilt, marquee and pulses (the marquee becomes a static wrap).
+
+**Photography.** Photos are stored locally as responsive WebP versions (`srcset`) generated from the Unsplash originals listed in `public/images/credits.md`. The hero image loads with high priority; the rest load lazily.
 
 ## Demo data
 
@@ -153,7 +168,7 @@ The demo has 37 editions in 11 genres and 7 languages (English, French, Spanish,
 Run on Linux (Node 24, Chromium headless shell 156) on 25 Oct 2026:
 
 - `npm run lint`, `npm run typecheck` and `npm run build` pass.
-- `npm test`: **61 passing**. Domain rules (no double checkout, version conflicts, return → hold, pickup expiry chain, renewal blocks, sessions, idempotent jobs, seed invariants), mock API (abort, idempotency, racing desks, offline), and integration tests on the real routes:
+- `npm test`: **63 passing**. Domain rules (no double checkout, version conflicts, return → hold, pickup expiry chain, renewal blocks, sessions, idempotent jobs, seed invariants), mock API (abort, idempotency, racing desks, offline), and integration tests on the real routes:
   - filters survive opening a book and pressing Back, with focus restored to the card;
   - direct links to books;
   - the preview dialog opens from the URL, closes on Escape and restores focus, and Tab stays inside it;
@@ -165,7 +180,9 @@ Run on Linux (Node 24, Chromium headless shell 156) on 25 Oct 2026:
   - reserving;
   - the desk refuses a second checkout of a copy and shows a conflict on a stale scan;
   - a return updates the reservations page and the public book page;
-  - reshelving gates availability; reading sessions; overdue filter.
+  - reshelving gates availability; reading sessions; overdue filter;
+  - the theme toggle follows the system, then persists an explicit choice.
+- Light and dark themes were reviewed from headless-Chromium screenshots at 1440px, 820px and 390px.
 - `npm run test:e2e`: **3 passing** in desktop Chromium. The full definition-of-done story across a kiosk tab and a staff tab; no horizontal overflow on 8 kiosk pages at 360, 390, 820, 1180 and 1366px wide; the skip link is the first tab stop and focus moves to the new page heading.
 
 Not measured: no Lighthouse, axe or screen-reader audit was run, and real iPad hardware wasn't tested. The responsive checks above are viewport emulation in headless Chromium.
@@ -173,9 +190,8 @@ Not measured: no Lighthouse, axe or screen-reader audit was run, and real iPad h
 ## Known limitations and tradeoffs
 
 - **The mock is the backend.** Data lives in this browser's `localStorage`. Two different browsers don't share data.
-- **Main bundle about 138 kB gzipped.** It includes React, the router, TanStack Query and the mock API with all fixtures. The staff workspace is split out (about 13 kB gzipped). With a real API, the fixtures leave the bundle.
+- **Main bundle about 184 kB gzipped.** It includes React, the router, TanStack Query, framer-motion (about 45 kB) and the mock API with all fixtures. The staff workspace is split out (about 13 kB gzipped). Next steps would be framer-motion's `LazyMotion` with `m` components and code-splitting the kiosk routes. With a real API, the fixtures also leave the bundle.
 - **No offline cache persistence.** Catalogue and map data stay in memory for the session (the map is cached indefinitely), but nothing persists across reloads while offline.
 - **Kiosk "attract mode"** (resetting public browsing after long idle) isn't implemented. Only member sessions time out.
 - **AI discovery isn't implemented.** The non-AI path (Explore + search) is complete. Adding AI would need a server-side endpoint that keeps the API key off the client and searches only this catalogue.
-- **No dark mode.** The kiosk is designed for bright library lighting.
 - **Original Blurb notes.** The three `.txt` blurbs from the first version of this project are kept and shown as "Blurb notes", with find-in-text and word insights. The *Pride and Prejudice* and *Sherlock Holmes* notes read like encyclopaedia text: **check their source** before publishing this project.

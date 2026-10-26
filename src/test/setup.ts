@@ -19,3 +19,30 @@ globalThis.Request = class extends NodeRequest {
 
 // jsdom doesn't implement scrolling; ScrollRestoration calls it on navigation.
 window.scrollTo = () => {};
+
+// jsdom lacks matchMedia (theme + reduced-motion checks) and IntersectionObserver
+// (framer-motion's whileInView). Minimal stand-ins: no media matches, and
+// everything counts as in view immediately.
+window.matchMedia ??= ((query: string) => ({
+  matches: false,
+  media: query,
+  onchange: null,
+  addEventListener: () => {},
+  removeEventListener: () => {},
+  addListener: () => {},
+  removeListener: () => {},
+  dispatchEvent: () => false,
+})) as typeof window.matchMedia;
+
+class IO {
+  constructor(private cb: IntersectionObserverCallback) {}
+  observe(target: Element) {
+    this.cb([{ isIntersecting: true, intersectionRatio: 1, target } as IntersectionObserverEntry], this as unknown as IntersectionObserver);
+  }
+  unobserve() {}
+  disconnect() {}
+  takeRecords() {
+    return [];
+  }
+}
+window.IntersectionObserver ??= IO as unknown as typeof IntersectionObserver;

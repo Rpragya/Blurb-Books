@@ -21,7 +21,7 @@ export function SaveButton({ editionId }: { editionId: string }) {
 
   if (!session) {
     return (
-      <ButtonLink to={`/member?next=/books/${editionId}`} icon="bookmark" variant="ghost">
+      <ButtonLink to={`/member?next=/books/${editionId}`} icon="bookmark" variant="primary" size="lg">
         Sign in to save
       </ButtonLink>
     );
@@ -30,12 +30,14 @@ export function SaveButton({ editionId }: { editionId: string }) {
   return (
     <Button
       icon={saved ? 'bookmarkFilled' : 'bookmark'}
+      variant={saved ? 'secondary' : 'primary'}
+      size="lg"
       aria-pressed={saved}
       loading={toggle.isPending || overview.isPending}
       disabled={!online}
       onClick={() => toggle.mutate()}
     >
-      {saved ? 'Saved' : 'Save'}
+      {saved ? 'On my bookshelf' : 'Save to my bookshelf'}
     </Button>
   );
 }

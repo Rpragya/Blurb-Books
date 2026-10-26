@@ -30,7 +30,7 @@ test('discover → preview → locate → borrow → reserve → return assigns 
 
   // 1. A visitor discovers a mystery novel.
   await kiosk.goto('/');
-  await kiosk.getByRole('link', { name: /Mystery & Crime/ }).click();
+  await kiosk.getByRole('link', { name: /^Mystery/ }).click();
   await expect(kiosk).toHaveURL(/genre=mystery/);
   await kiosk.getByRole('radio', { name: /Can borrow today/ }).first().check();
   await expect(kiosk).toHaveURL(/avail=borrow-now/);
@@ -118,6 +118,6 @@ test('keyboard: skip link and focus moves to the new page heading', async ({ pag
   await page.getByRole('heading', { level: 1 }).waitFor();
   await page.keyboard.press('Tab');
   await expect(page.getByRole('link', { name: 'Skip to main content' })).toBeFocused();
-  await page.getByRole('link', { name: 'Browse', exact: true }).click();
-  await expect(page.getByRole('heading', { level: 1, name: 'Help me choose' })).toBeFocused();
+  await page.getByRole('link', { name: 'The collection', exact: true }).first().click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Discover your next chapter.' })).toBeFocused();
 });

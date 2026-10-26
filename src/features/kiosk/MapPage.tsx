@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { useBook, useFloorPlan } from '../../api/queries';
@@ -85,6 +86,16 @@ export function MapPage() {
       <div className="map-layout">
         {edition && copy && location && (
           <section className="directions" aria-labelledby="directions-heading">
+            <p className={`locate-status${copy.status === 'available' ? ' locate-status--ok' : ''}`}>
+              <span className="locate-status__dot" aria-hidden="true" />
+              {copy.status === 'available' ? 'Available now' : 'Not on the shelf right now'}
+              <span className="locate-status__count">
+                {onShelf.length} {onShelf.length === 1 ? 'copy' : 'copies'} on shelf
+              </span>
+            </p>
+            <p className="locate-big" aria-hidden="true">
+              {location.floor.name} <span>/</span> Rack {location.rack.label} <span>/</span> Shelf {location.shelf}
+            </p>
             <h2 id="directions-heading">Directions</h2>
             <p className="directions__breadcrumb">{location.breadcrumb}</p>
             {copy.status !== 'available' && (
@@ -162,6 +173,7 @@ export function MapPage() {
               </button>
             </p>
           )}
+          <motion.div key={floorId} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.35 }}>
           <ShelfMap
             plan={plan.data}
             floorId={floorId}
@@ -170,11 +182,27 @@ export function MapPage() {
             onSelectRack={setSelectedRack}
             label={`${floors.find((f) => f.id === floorId)!.name} plan${location ? `. Your book is in rack ${location.rack.label}.` : ''} Text directions are provided separately.`}
           />
+          </motion.div>
           <div className="map-legend" aria-hidden="true">
             <span className="map-legend__item map-legend__item--you">You are here</span>
             {location && <span className="map-legend__item map-legend__item--target">Your book</span>}
             <span className="map-legend__item map-legend__item--rack">Rack</span>
           </div>
+          {location && (
+            <div className="rack-card">
+              <div className="rack-card__photo" aria-hidden="true">
+                <img src="/images/library-reading-720.webp" alt="" loading="lazy" />
+                <span>{location.rack.label}</span>
+              </div>
+              <div>
+                <h3>Look for rack {location.rack.label}</h3>
+                <p>
+                  On the {location.floor.name.toLowerCase()}, head to {location.section.name}. Rack {location.rack.label}, shelf{' '}
+                  {location.shelf} from the top — books are shelved alphabetically by author.
+                </p>
+              </div>
+            </div>
+          )}
           <div aria-live="polite">
             {selected && (
               <p className="rack-info">

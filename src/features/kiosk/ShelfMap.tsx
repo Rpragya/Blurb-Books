@@ -1,4 +1,5 @@
-import { memo, type KeyboardEvent } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
+import { memo, useId, type KeyboardEvent } from 'react';
 import type { Floor, FloorPlan, Rack } from '../../domain/types';
 
 interface ShelfMapProps {
@@ -38,6 +39,9 @@ export const ShelfMap = memo(function ShelfMap({ plan, floorId, targetRackId, se
   const target = racks.find((r) => r.id === targetRackId);
   const onKiosk = plan.kiosk.floorId === floorId;
   const targetElsewhere = targetRackId && !target;
+  const reduce = useReducedMotion();
+  const maskId = useId();
+  const route = target ? routeTo(plan, floorId, target) : undefined;
 
   const onKey = (event: KeyboardEvent, rackId: string) => {
     if (event.key === 'Enter' || event.key === ' ') {
@@ -86,7 +90,26 @@ export const ShelfMap = memo(function ShelfMap({ plan, floorId, targetRackId, se
         </text>
       </g>
 
-      {target && <path d={routeTo(plan, floorId, target)} className="shelf-map__route" aria-hidden="true" />}
+      {route && (
+        <g aria-hidden="true">
+          {/* The dotted route is revealed by an animated mask so the dots stay crisp while it "draws". */}
+          <mask id={maskId} maskUnits="userSpaceOnUse">
+            <motion.path
+              key={route}
+              d={route}
+              fill="none"
+              stroke="white"
+              strokeWidth="14"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              initial={{ pathLength: reduce ? 1 : 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{ duration: 1.6, ease: [0.65, 0, 0.35, 1], delay: 0.3 }}
+            />
+          </mask>
+          <path d={route} className="shelf-map__route" mask={`url(#${maskId})`} />
+        </g>
+      )}
 
       {racks.map((rack) => {
         const section = sections.find((s) => s.id === rack.sectionId)!;
@@ -121,7 +144,8 @@ export const ShelfMap = memo(function ShelfMap({ plan, floorId, targetRackId, se
 
       {onKiosk && (
         <g className="shelf-map__you" aria-hidden="true">
-          <circle cx={plan.kiosk.x} cy={plan.kiosk.y} r="16" />
+          <circle cx={plan.kiosk.x} cy={plan.kiosk.y} r="16" className="shelf-map__ripple" />
+          <circle cx={plan.kiosk.x} cy={plan.kiosk.y} r="16" className="shelf-map__you-ring" />
           <circle cx={plan.kiosk.x} cy={plan.kiosk.y} r="6" className="shelf-map__you-dot" />
           <text x={plan.kiosk.x + 26} y={plan.kiosk.y + 6} className="shelf-map__you-label">
             You are here

@@ -1,44 +1,87 @@
 /*
- * Design tokens. One accent (the Blurb violet from the original logo
- * gradient), warm ivory surfaces and deep ink text. Status colours are always
- * paired with an icon and words — never colour alone.
+ * Design tokens.
+ *
+ * Two themes share one set of semantic names. Components never use raw
+ * colours: they use these tokens, so light and dark stay in lockstep.
+ *
+ * Accent comes in two roles:
+ *   --accent        text, links, icons (passes 4.5:1 on --paper)
+ *   --accent-fill   solid backgrounds carrying --accent-ink text
+ *
+ * Theme selection: the system preference applies unless the reader picks one,
+ * which is stored and set as [data-theme] on <html> before first paint.
  */
 :root {
-  --paper: #fbf7ef;
-  --paper-2: #f4ede0;
-  --paper-3: #ebe2d1;
-  --card: #fffdf8;
-  --ink: #1d1a26;
-  --ink-2: #464152;
-  --ink-3: #686273;
-  --line: #e2d8c6;
-  --line-strong: #c9bca5;
+  --paper: #faf9f6;
+  --paper-2: #f2f0eb;
+  --paper-3: #e8e4dc;
+  --card: #fffefb;
+  --elevated: #ffffff;
+  --ink: #1f1f27;
+  --ink-2: #4e4f58;
+  --ink-3: #6b6b74;
+  --line: #e4e0d8;
+  --line-strong: #c9c4ba;
 
-  --accent: #4b1fa0;
-  --accent-hover: #3c1682;
+  --accent: #5732d1;
+  --accent-hover: #4423b4;
+  --accent-fill: #6342d8;
+  --accent-fill-hover: #5132c0;
   --accent-ink: #ffffff;
-  --accent-soft: #efe8fb;
-  --accent-line: #cdbcf0;
+  --accent-soft: #efeafc;
+  --accent-line: #d2c6f3;
+  --accent-glow: rgb(99 66 216 / 0.28);
 
   --ok: #1d6a43;
-  --ok-soft: #e2f1e7;
-  --warn: #855400;
+  --ok-soft: #e1f1e7;
+  --ok-dot: #2f9a5f;
+  --warn: #8a5600;
   --warn-soft: #fbefd3;
-  --danger: #a2281f;
-  --danger-soft: #fbe4e0;
+  --danger: #a3261d;
+  --danger-soft: #fbe3df;
   --info: #285a85;
   --info-soft: #e3eef8;
-  --neutral-soft: #ece6dc;
+  --neutral-soft: #ece8e1;
+
+  /* Surfaces with a job */
+  --header-bg: rgb(250 249 246 / 0.86);
+  --input-bg: #ffffff;
+  --plate-1: #eeebe4;
+  --plate-2: #f1e8df;
+  --plate-3: #e6ece5;
+  --plate-4: #ebe7ef;
+  --chrome-bg: #1f2027;
+  --chrome-ink: #f1efea;
+  --chrome-ink-2: #a9a8b0;
+  --chrome-line: rgb(255 255 255 / 0.1);
+  --scrim: rgb(20 18 28 / 0.5);
+  --highlight: #ffe28a;
+  --highlight-ink: #1f1f27;
+
+  /* Shelf map */
+  --map-floor: #ffffff;
+  --map-wall: #9c978d;
+  --map-section: #f6f4ef;
+  --map-section-line: #dcd7cd;
+  --map-label: #6b6b74;
+  --map-rack: #e7e3da;
+  --map-rack-line: #9c978d;
+  --map-rack-hover: #d8d2c5;
+  --map-desk: #2a2b33;
+  --map-desk-ink: #f6f4ef;
+  --you: #1d7a4b;
 
   --font-display: 'Fraunces Variable', 'Iowan Old Style', Georgia, serif;
+  --font-heading: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-body: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
-  --step--1: clamp(0.8rem, 0.78rem + 0.1vw, 0.875rem);
+  --step--1: clamp(0.8125rem, 0.79rem + 0.1vw, 0.875rem);
   --step-0: clamp(0.95rem, 0.92rem + 0.15vw, 1.0625rem);
   --step-1: clamp(1.1rem, 1.05rem + 0.3vw, 1.3rem);
-  --step-2: clamp(1.35rem, 1.2rem + 0.6vw, 1.75rem);
-  --step-3: clamp(1.7rem, 1.4rem + 1.3vw, 2.6rem);
-  --step-4: clamp(2.2rem, 1.6rem + 2.6vw, 3.8rem);
+  --step-2: clamp(1.4rem, 1.2rem + 0.7vw, 1.85rem);
+  --step-3: clamp(1.9rem, 1.5rem + 1.6vw, 2.9rem);
+  --step-4: clamp(2.5rem, 1.7rem + 3.4vw, 4.6rem);
+  --step-5: clamp(3rem, 1.8rem + 5vw, 6.4rem);
 
   --s-1: 4px;
   --s-2: 8px;
@@ -48,29 +91,170 @@
   --s-6: 32px;
   --s-7: 48px;
   --s-8: 72px;
+  --s-9: 112px;
 
-  --r-1: 6px;
-  --r-2: 10px;
-  --r-3: 16px;
+  --r-1: 4px;
+  --r-2: 6px;
+  --r-3: 10px;
+  --r-4: 16px;
   --r-pill: 999px;
 
   --tap: 48px;
-  --shadow-1: 0 1px 2px rgb(40 28 10 / 0.06), 0 1px 1px rgb(40 28 10 / 0.04);
-  --shadow-2: 0 6px 20px rgb(40 28 10 / 0.1), 0 2px 6px rgb(40 28 10 / 0.06);
-  --shadow-3: 0 24px 60px rgb(30 20 5 / 0.22);
-  --focus: 0 0 0 3px var(--paper), 0 0 0 6px var(--accent);
+  --header-h: 76px;
+  --shadow-1: 0 1px 2px rgb(30 24 12 / 0.06), 0 1px 1px rgb(30 24 12 / 0.04);
+  --shadow-2: 0 10px 30px -12px rgb(30 24 12 / 0.22), 0 2px 6px rgb(30 24 12 / 0.06);
+  --shadow-3: 0 30px 70px -20px rgb(20 14 4 / 0.4);
+  --shadow-cover: 6px 12px 22px -6px rgb(30 22 40 / 0.4), 1px 1px 2px rgb(0 0 0 / 0.12);
+  --focus-ring: var(--accent);
+  --focus: 0 0 0 2px var(--paper), 0 0 0 4px var(--focus-ring);
 
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
-  --dur-1: 120ms;
-  --dur-2: 220ms;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-1: 140ms;
+  --dur-2: 260ms;
+  --dur-3: 600ms;
 
-  --content: 1240px;
+  --content: 1320px;
   color-scheme: light;
+}
+
+/* Dark: deep ink-violet rather than flat black, so covers and photos glow. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --paper: #121118;
+    --paper-2: #18171f;
+    --paper-3: #23222c;
+    --card: #1a1922;
+    --elevated: #201f29;
+    --ink: #eeebf3;
+    --ink-2: #c3bfcc;
+    --ink-3: #9d98a8;
+    --line: #2c2a35;
+    --line-strong: #46434f;
+
+    --accent: #b6a5ff;
+    --accent-hover: #cbbfff;
+    --accent-fill: #6e50e2;
+    --accent-fill-hover: #7f63ee;
+    --accent-ink: #ffffff;
+    --accent-soft: #262040;
+    --accent-line: #43397a;
+    --accent-glow: rgb(140 112 255 / 0.32);
+
+    --ok: #7fd9a5;
+    --ok-soft: #15301f;
+    --ok-dot: #4fc483;
+    --warn: #f0c46c;
+    --warn-soft: #33280f;
+    --danger: #ff978a;
+    --danger-soft: #3b1a17;
+    --info: #95c6f2;
+    --info-soft: #15283a;
+    --neutral-soft: #2a2832;
+
+    --header-bg: rgb(18 17 24 / 0.82);
+    --input-bg: #1d1c25;
+    --plate-1: #1f1e27;
+    --plate-2: #241f22;
+    --plate-3: #1c231f;
+    --plate-4: #221f2a;
+    --chrome-bg: #0b0a0f;
+    --chrome-ink: #ece9f1;
+    --chrome-ink-2: #8f8a9a;
+    --chrome-line: rgb(255 255 255 / 0.08);
+    --scrim: rgb(0 0 0 / 0.62);
+    --highlight: #6d5a12;
+    --highlight-ink: #fff6d6;
+
+    --map-floor: #17161e;
+    --map-wall: #5b5766;
+    --map-section: #1d1c25;
+    --map-section-line: #34313d;
+    --map-label: #a39eae;
+    --map-rack: #2b2934;
+    --map-rack-line: #5b5766;
+    --map-rack-hover: #3a3746;
+    --map-desk: #e9e6ef;
+    --map-desk-ink: #17161e;
+    --you: #5fd296;
+
+    --shadow-1: 0 1px 2px rgb(0 0 0 / 0.4);
+    --shadow-2: 0 14px 34px -14px rgb(0 0 0 / 0.7), 0 2px 6px rgb(0 0 0 / 0.3);
+    --shadow-3: 0 30px 80px -20px rgb(0 0 0 / 0.8);
+    --shadow-cover: 8px 14px 26px -6px rgb(0 0 0 / 0.65), 1px 1px 2px rgb(0 0 0 / 0.4);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --paper: #121118;
+  --paper-2: #18171f;
+  --paper-3: #23222c;
+  --card: #1a1922;
+  --elevated: #201f29;
+  --ink: #eeebf3;
+  --ink-2: #c3bfcc;
+  --ink-3: #9d98a8;
+  --line: #2c2a35;
+  --line-strong: #46434f;
+
+  --accent: #b6a5ff;
+  --accent-hover: #cbbfff;
+  --accent-fill: #6e50e2;
+  --accent-fill-hover: #7f63ee;
+  --accent-ink: #ffffff;
+  --accent-soft: #262040;
+  --accent-line: #43397a;
+  --accent-glow: rgb(140 112 255 / 0.32);
+
+  --ok: #7fd9a5;
+  --ok-soft: #15301f;
+  --ok-dot: #4fc483;
+  --warn: #f0c46c;
+  --warn-soft: #33280f;
+  --danger: #ff978a;
+  --danger-soft: #3b1a17;
+  --info: #95c6f2;
+  --info-soft: #15283a;
+  --neutral-soft: #2a2832;
+
+  --header-bg: rgb(18 17 24 / 0.82);
+  --input-bg: #1d1c25;
+  --plate-1: #1f1e27;
+  --plate-2: #241f22;
+  --plate-3: #1c231f;
+  --plate-4: #221f2a;
+  --chrome-bg: #0b0a0f;
+  --chrome-ink: #ece9f1;
+  --chrome-ink-2: #8f8a9a;
+  --chrome-line: rgb(255 255 255 / 0.08);
+  --scrim: rgb(0 0 0 / 0.62);
+  --highlight: #6d5a12;
+  --highlight-ink: #fff6d6;
+
+  --map-floor: #17161e;
+  --map-wall: #5b5766;
+  --map-section: #1d1c25;
+  --map-section-line: #34313d;
+  --map-label: #a39eae;
+  --map-rack: #2b2934;
+  --map-rack-line: #5b5766;
+  --map-rack-hover: #3a3746;
+  --map-desk: #e9e6ef;
+  --map-desk-ink: #17161e;
+  --you: #5fd296;
+
+  --shadow-1: 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-2: 0 14px 34px -14px rgb(0 0 0 / 0.7), 0 2px 6px rgb(0 0 0 / 0.3);
+  --shadow-3: 0 30px 80px -20px rgb(0 0 0 / 0.8);
+  --shadow-cover: 8px 14px 26px -6px rgb(0 0 0 / 0.65), 1px 1px 2px rgb(0 0 0 / 0.4);
+  color-scheme: dark;
 }
 
 @media (prefers-reduced-motion: reduce) {
   :root {
     --dur-1: 0ms;
     --dur-2: 0ms;
+    --dur-3: 0ms;
   }
 }

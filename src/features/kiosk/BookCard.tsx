@@ -5,6 +5,7 @@ import { rememberFocus } from '../../app/focus';
 import { GENRES, LANGUAGES } from '../../domain/taxonomy';
 import { ButtonLink } from '../../ui/Button';
 import { Cover } from '../../ui/Cover';
+import { Tilt } from '../../ui/motion';
 import { AvailabilityBadge } from '../../ui/Status';
 
 interface BookCardProps {
@@ -12,9 +13,15 @@ interface BookCardProps {
   /** Link target for "Preview"; omit to hide the preview action. */
   previewTo?: string;
   layout?: 'grid' | 'compact';
+  /** Picks one of four plate tints so a grid doesn't look uniform. */
+  tint?: number;
 }
 
-export const BookCard = memo(function BookCard({ book, previewTo, layout = 'grid' }: BookCardProps) {
+/**
+ * Gallery card: the cover is the hero. One tab stop for the title link, plus
+ * the Preview / Locate actions; the cover plate is a mouse-only shortcut.
+ */
+export const BookCard = memo(function BookCard({ book, previewTo, layout = 'grid', tint = 1 }: BookCardProps) {
   const { edition, availability } = book;
   const location = useLocation();
   const titleId = `book-${edition.id}-title`;
@@ -24,8 +31,21 @@ export const BookCard = memo(function BookCard({ book, previewTo, layout = 'grid
 
   return (
     <article className={`book-card book-card--${layout}`} aria-labelledby={titleId}>
-      <Link to={`/books/${edition.id}`} className="book-card__cover" tabIndex={-1} aria-hidden="true" onClick={remember}>
-        <Cover edition={edition} size={layout === 'compact' ? 'sm' : 'md'} />
+      <Link
+        to={`/books/${edition.id}`}
+        className={`book-card__cover book-card__plate--${tint}`}
+        tabIndex={-1}
+        aria-hidden="true"
+        onClick={remember}
+        state={{ fromResults: true }}
+      >
+        {layout === 'grid' ? (
+          <Tilt className="book-card__tilt">
+            <Cover edition={edition} size="md" />
+          </Tilt>
+        ) : (
+          <Cover edition={edition} size="sm" />
+        )}
       </Link>
       <div className="book-card__body">
         <h3 className="book-card__title" id={titleId}>
@@ -49,7 +69,7 @@ export const BookCard = memo(function BookCard({ book, previewTo, layout = 'grid
               </ButtonLink>
             )}
             {availability.onShelf > 0 && (
-              <ButtonLink to={`/books/${edition.id}/locate`} size="sm" variant="ghost" icon="pin" aria-describedby={titleId} onClick={remember}>
+              <ButtonLink to={`/books/${edition.id}/locate`} size="sm" variant="primary" icon="pin" aria-describedby={titleId} onClick={remember}>
                 Locate
               </ButtonLink>
             )}
@@ -69,7 +89,6 @@ export function BookCardSkeleton() {
       <div className="book-card__body">
         <div className="skeleton skeleton--line" style={{ width: '80%' }} />
         <div className="skeleton skeleton--line" style={{ width: '50%' }} />
-        <div className="skeleton skeleton--line" style={{ width: '95%' }} />
         <div className="skeleton skeleton--line" style={{ width: '40%' }} />
       </div>
     </div>

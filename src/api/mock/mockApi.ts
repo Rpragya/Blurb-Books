@@ -319,6 +319,7 @@ export function createMockApi(options: MockApiOptions = {}): LibraryApi {
           staffPicks: all.filter((s) => s.edition.recommendation).slice(0, 8),
           newArrivals: [...all].sort((a, b) => b.edition.addedAt.localeCompare(a.edition.addedAt)).slice(0, 8),
           availableNow: all.filter((s) => s.availability.lendableOnShelf > 0).length,
+          totalTitles: all.length,
           genreCounts,
           asOf: at.toISOString(),
         };

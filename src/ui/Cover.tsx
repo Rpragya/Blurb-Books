@@ -7,10 +7,14 @@ interface CoverProps {
 }
 
 /**
- * Generated typographic cover. No network images means no broken covers,
- * no layout shift and nothing to license — and every book still looks distinct.
+ * Local illustrated jackets for featured titles, with typographic artwork
+ * for the rest of the demo catalogue. Assets never require runtime network access.
  */
 export const Cover = memo(function Cover({ edition, size = 'md' }: CoverProps) {
+  const illustrated = ['mapleford', 'dracula'].includes(edition.id);
+  if (illustrated) {
+    return <div className={`cover cover--${size} cover--illustrated`} style={{ backgroundImage: `url(/images/generated/cover-${edition.id}.webp)`, backgroundSize: 'cover', backgroundPosition: 'center' }} aria-hidden="true"><span className="cover__spine" /></div>;
+  }
   const { hue, motif } = edition.cover;
   const bg = `hsl(${hue} 42% 30%)`;
   const fg = `hsl(${hue} 60% 90%)`;
@@ -18,6 +22,7 @@ export const Cover = memo(function Cover({ edition, size = 'md' }: CoverProps) {
   const title = edition.title.replace(/\s*\(.*\)$/, '');
   return (
     <div className={`cover cover--${size}`} style={{ background: bg, color: fg }} aria-hidden="true">
+      <img className="cover__artwork" src={`/images/generated/genre-${motif === 'diamond' || motif === 'arch' ? 'mystery' : motif === 'wave' || motif === 'grid' ? 'science' : 'fiction'}.webp`} alt="" loading="lazy" />
       <svg className="cover__motif" viewBox="0 0 100 150" preserveAspectRatio="none">
         <Motif motif={motif} color={mark} />
       </svg>

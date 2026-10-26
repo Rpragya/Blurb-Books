@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useBook, useFloorPlan } from '../../api/queries';
 import type { BookDetail, PublicCopy } from '../../api/types';
@@ -9,11 +10,19 @@ import { Button, ButtonLink } from '../../ui/Button';
 import { Cover } from '../../ui/Cover';
 import { EmptyState, ErrorState, Freshness, Spinner } from '../../ui/Feedback';
 import { Icon } from '../../ui/Icon';
+import { EASE_OUT_EXPO, Reveal, Tilt } from '../../ui/motion';
 import { AvailabilityBadge, CopyStatusBadge } from '../../ui/Status';
 import { BlurbNotes } from './BlurbNotes';
 import { BookCard } from './BookCard';
 import { ReserveAction, SaveButton } from './BookActions';
 import { PreviewText } from './PreviewText';
+
+/** First sentence or two of the preview, cut at a word boundary. */
+function excerptTeaser(text: string, max = 220): string {
+  const flat = text.replace(/\s+/g, ' ').trim();
+  if (flat.length <= max) return flat;
+  return `${flat.slice(0, flat.lastIndexOf(' ', max))}…`;
+}
 
 const dateFormat = new Intl.DateTimeFormat('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
 
@@ -65,16 +74,39 @@ export function BookPage() {
       </nav>
 
       <article className="book-hero" aria-labelledby="book-title">
-        <div className="book-hero__cover">
-          <Cover edition={edition} size="lg" />
-        </div>
-        <div className="book-hero__info">
-          <p className="eyebrow">
+        <motion.div
+          className="book-hero__cover"
+          initial={{ opacity: 0, y: 24, rotate: -2 }}
+          animate={{ opacity: 1, y: 0, rotate: 0 }}
+          transition={{ duration: 0.9, ease: EASE_OUT_EXPO }}
+        >
+          <span className="book-hero__glow" aria-hidden="true" style={{ background: `hsl(${edition.cover.hue} 60% 55% / 0.35)` }} />
+          <Tilt max={10}>
+            <Cover edition={edition} size="lg" />
+          </Tilt>
+        </motion.div>
+        <motion.div
+          className="book-hero__info"
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.9, ease: EASE_OUT_EXPO, delay: 0.1 }}
+        >
+          <p className="kicker">
             {edition.genres.map((g) => GENRES[g].label).join(' · ')} · {LANGUAGES[edition.language]}
           </p>
           <PageHeading id="book-title">{edition.title}</PageHeading>
           <p className="book-hero__author">by {edition.authors.join(', ')}</p>
           <p className="book-hero__description">{edition.description}</p>
+
+          <figure className="sample-excerpt">
+            <figcaption>
+              {edition.preview.kind === 'public-domain-excerpt' ? 'Sample excerpt · public domain' : 'Sample · original demo text'}
+            </figcaption>
+            <blockquote>“{excerptTeaser(edition.preview.text)}”</blockquote>
+            <a href="#preview" className="sample-excerpt__more">
+              Read the full preview <Icon name="arrowDown" size={14} />
+            </a>
+          </figure>
 
           <div className="book-hero__availability">
             <AvailabilityBadge availability={availability} showDetail />
@@ -82,18 +114,18 @@ export function BookPage() {
           </div>
 
           <div className="book-hero__actions">
+            <SaveButton editionId={edition.id} />
             {onShelf.length > 0 && (
-              <ButtonLink to={`/books/${edition.id}/locate`} variant="primary" size="lg" icon="pin">
-                Locate a copy
+              <ButtonLink to={`/books/${edition.id}/locate`} variant="secondary" size="lg" icon="pin">
+                Locate copy
               </ButtonLink>
             )}
-            <SaveButton editionId={edition.id} />
-            <ButtonLink to={`/handoff?to=${encodeURIComponent(`/books/${edition.id}`)}`} variant="ghost" icon="qr">
+            <ButtonLink to={`/handoff?to=${encodeURIComponent(`/books/${edition.id}`)}`} variant="quiet" icon="qr">
               Continue on your phone
             </ButtonLink>
           </div>
           <ReserveAction book={book.data} />
-        </div>
+        </motion.div>
       </article>
 
       <div className="book-body">
@@ -103,11 +135,11 @@ export function BookPage() {
             <NextSteps book={book.data} plan={plan.data} />
           </section>
 
-          <section aria-labelledby="synopsis" className="book-section">
+          <Reveal as="section" aria-labelledby="synopsis" className="book-section">
             <h2 id="synopsis">Synopsis</h2>
             <p className="label-pill">Editorial summary by library staff</p>
             <p className="book-synopsis">{edition.synopsis}</p>
-          </section>
+          </Reveal>
 
           {edition.recommendation && (
             <section aria-labelledby="recommendation" className="book-section">
@@ -119,10 +151,10 @@ export function BookPage() {
             </section>
           )}
 
-          <section aria-labelledby="preview" className="book-section">
-            <h2 id="preview">Preview</h2>
+          <Reveal as="section" aria-labelledby="preview-heading" className="book-section" id="preview">
+            <h2 id="preview-heading">Preview</h2>
             <PreviewText preview={edition.preview} />
-          </section>
+          </Reveal>
 
           {edition.blurbNotesFile && (
             <section aria-labelledby="blurb-notes" className="book-section">

@@ -18,70 +18,90 @@ function toggle<T>(list: T[], value: T): T[] {
   return list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
 }
 
+/**
+ * Genre navigation styled as a list (per the editorial catalogue) but built
+ * from real checkboxes, so several genres can be combined and assistive
+ * tech announces checked state.
+ */
+export function GenreList({ params, onChange }: Omit<FilterPanelProps, 'idPrefix'>) {
+  const none = params.genres.length === 0;
+  return (
+    <fieldset className="genre-list">
+      <legend>Genres</legend>
+      <button type="button" className="genre-list__item genre-list__all" aria-pressed={none} onClick={() => onChange({ genres: [] })}>
+        All genres
+      </button>
+      {(Object.keys(GENRES) as GenreId[]).map((g) => (
+        <label key={g} className="genre-list__item">
+          <input type="checkbox" checked={params.genres.includes(g)} onChange={() => onChange({ genres: toggle(params.genres, g) })} />
+          <span>{GENRES[g].label}</span>
+        </label>
+      ))}
+    </fieldset>
+  );
+}
+
 export function FilterPanel({ params, onChange, idPrefix }: FilterPanelProps) {
   return (
     <div className="filters">
-      <fieldset className="filters__group">
-        <legend>Availability</legend>
-        {AVAILABILITY.map(([value, label, hint]) => (
-          <label key={value} className="radio-row">
-            <input
-              type="radio"
-              name={`${idPrefix}-availability`}
-              value={value}
-              checked={params.availability === value}
-              onChange={() => onChange({ availability: value })}
-            />
-            <span>
-              {label}
-              <span className="radio-row__hint">{hint}</span>
-            </span>
-          </label>
-        ))}
-      </fieldset>
-
-      <fieldset className="filters__group">
-        <legend>Genre</legend>
-        <div className="chip-row">
-          {(Object.keys(GENRES) as GenreId[]).map((g) => (
-            <label key={g} className="chip">
-              <input type="checkbox" checked={params.genres.includes(g)} onChange={() => onChange({ genres: toggle(params.genres, g) })} />
-              <span>{GENRES[g].label}</span>
-            </label>
-          ))}
-        </div>
-      </fieldset>
-
-      <fieldset className="filters__group">
-        <legend>Language</legend>
-        <div className="chip-row">
-          {(Object.keys(LANGUAGES) as LanguageCode[]).map((l) => (
-            <label key={l} className="chip">
+      <details className="filters__group" open>
+        <summary>Availability</summary>
+        <fieldset>
+          <legend className="visually-hidden">Availability</legend>
+          {AVAILABILITY.map(([value, label, hint]) => (
+            <label key={value} className="radio-row">
               <input
-                type="checkbox"
-                checked={params.languages.includes(l)}
-                onChange={() => onChange({ languages: toggle(params.languages, l) })}
+                type="radio"
+                name={`${idPrefix}-availability`}
+                value={value}
+                checked={params.availability === value}
+                onChange={() => onChange({ availability: value })}
               />
-              <span>{LANGUAGES[l]}</span>
-            </label>
-          ))}
-        </div>
-      </fieldset>
-
-      <fieldset className="filters__group">
-        <legend>Interests</legend>
-        <div className="chip-row">
-          {(Object.keys(INTEREST_TAGS) as InterestTagId[]).map((t) => (
-            <label key={t} className="chip">
-              <input type="checkbox" checked={params.tags.includes(t)} onChange={() => onChange({ tags: toggle(params.tags, t) })} />
               <span>
-                <span aria-hidden="true">{INTEREST_TAGS[t].emoji} </span>
-                {INTEREST_TAGS[t].label}
+                {label}
+                <span className="radio-row__hint">{hint}</span>
               </span>
             </label>
           ))}
-        </div>
-      </fieldset>
+        </fieldset>
+      </details>
+
+      <details className="filters__group" open={params.languages.length > 0 || undefined}>
+        <summary>Language</summary>
+        <fieldset>
+          <legend className="visually-hidden">Language</legend>
+          <div className="chip-row">
+            {(Object.keys(LANGUAGES) as LanguageCode[]).map((l) => (
+              <label key={l} className="chip">
+                <input
+                  type="checkbox"
+                  checked={params.languages.includes(l)}
+                  onChange={() => onChange({ languages: toggle(params.languages, l) })}
+                />
+                <span>{LANGUAGES[l]}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      </details>
+
+      <details className="filters__group" open={params.tags.length > 0 || undefined}>
+        <summary>Moods & interests</summary>
+        <fieldset>
+          <legend className="visually-hidden">Moods and interests</legend>
+          <div className="chip-row">
+            {(Object.keys(INTEREST_TAGS) as InterestTagId[]).map((t) => (
+              <label key={t} className="chip">
+                <input type="checkbox" checked={params.tags.includes(t)} onChange={() => onChange({ tags: toggle(params.tags, t) })} />
+                <span>
+                  <span aria-hidden="true">{INTEREST_TAGS[t].emoji} </span>
+                  {INTEREST_TAGS[t].label}
+                </span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      </details>
     </div>
   );
 }

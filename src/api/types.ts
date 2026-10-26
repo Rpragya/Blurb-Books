@@ -84,6 +84,7 @@ export interface HomeResponse {
   staffPicks: BookSummary[];
   newArrivals: BookSummary[];
   availableNow: number;
+  totalTitles: number;
   genreCounts: Record<GenreId, number>;
   asOf: string;
 }

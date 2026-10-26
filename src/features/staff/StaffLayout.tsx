@@ -3,6 +3,7 @@ import { Link, NavLink, Outlet } from 'react-router-dom';
 import { useApi, useOnline } from '../../api/ApiContext';
 import { keys } from '../../api/queries';
 import { usePageTitle } from '../../app/focus';
+import { ThemeToggle } from '../../app/theme';
 import { useStaffRole } from '../../session/StaffRole';
 import { Button } from '../../ui/Button';
 import { Icon } from '../../ui/Icon';
@@ -41,6 +42,7 @@ export function StaffLayout() {
         </span>
         <DemoClockBadge />
         <div className="staff-bar__actions">
+          <ThemeToggle className="theme-toggle--chrome" />
           <Link to="/" className="staff-bar__link">
             Kiosk view
           </Link>

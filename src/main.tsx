@@ -1,6 +1,7 @@
 import '@fontsource-variable/fraunces';
 import '@fontsource-variable/inter';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MotionConfig } from 'framer-motion';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
@@ -13,6 +14,8 @@ import './styles/base.css';
 import './styles/components.css';
 import './styles/kiosk.css';
 import './styles/staff.css';
+import './styles/discovery.css';
+import './styles/reference.css';
 import { AnnouncerProvider } from './ui/Feedback';
 
 // Swap this for a REST adapter implementing LibraryApi to use a real backend.
@@ -38,7 +41,10 @@ createRoot(document.getElementById('root')!).render(
     <QueryClientProvider client={queryClient}>
       <ApiProvider api={api}>
         <AnnouncerProvider>
-          <RouterProvider router={router} />
+          {/* Honour prefers-reduced-motion for every framer-motion animation. */}
+          <MotionConfig reducedMotion="user">
+            <RouterProvider router={router} />
+          </MotionConfig>
         </AnnouncerProvider>
       </ApiProvider>
     </QueryClientProvider>

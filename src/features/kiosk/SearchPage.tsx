@@ -1,3 +1,4 @@
+import { AnimatePresence, LayoutGroup, motion } from 'framer-motion';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useSearch } from '../../api/queries';
@@ -8,9 +9,10 @@ import { Button, ButtonLink } from '../../ui/Button';
 import { Dialog } from '../../ui/Dialog';
 import { EmptyState, ErrorState, Freshness, useAnnounceOnChange } from '../../ui/Feedback';
 import { Icon } from '../../ui/Icon';
+import { EASE_OUT_EXPO } from '../../ui/motion';
 import { Notice } from '../../ui/Status';
 import { BookCard, BookCardSkeleton } from './BookCard';
-import { ActiveFilters, FilterPanel } from './FilterPanel';
+import { ActiveFilters, FilterPanel, GenreList } from './FilterPanel';
 import { PreviewDialog } from './PreviewDialog';
 
 const SORT_LABELS: Record<SortKey, string> = {
@@ -102,7 +104,9 @@ export function SearchPage() {
   return (
     <div className="container search-page">
       <header className="search-header">
-        <PageHeading>{params.q ? <>Results for “{params.q}”</> : 'Search the library'}</PageHeading>
+        <p className="kicker">The collection</p>
+        <PageHeading>{params.q ? <>Results for “{params.q}”</> : <>Discover your next <em>chapter.</em></>}</PageHeading>
+        <p className="catalogue-intro">A familiar favourite or something unexpected. Your next great read starts here.</p>
         <form
           role="search"
           className="search-bar"
@@ -115,14 +119,14 @@ export function SearchPage() {
           <label htmlFor="search-q" className="visually-hidden">
             Search by title or author
           </label>
-          <Icon name="search" size={22} className="search-bar__icon" />
+          <Icon name="search" size={20} className="search-bar__icon" />
           <input
             id="search-q"
             type="search"
             className="search-bar__input"
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="Title, author or theme"
+            placeholder="Search books, authors, or themes"
             autoComplete="off"
             enterKeyHint="search"
           />
@@ -130,44 +134,53 @@ export function SearchPage() {
             Search
           </Button>
         </form>
+        <div className="catalogue-toolbar">
+          <label className="switch">
+            <input
+              type="checkbox"
+              role="switch"
+              checked={params.availability === 'borrow-now'}
+              onChange={(e) => update({ availability: e.target.checked ? 'borrow-now' : 'any' })}
+            />
+            <span className="switch__track" aria-hidden="true">
+              <span className="switch__thumb" />
+            </span>
+            Show only available now
+          </label>
+          <Button className="filters-toggle" size="sm" icon="filter" onClick={() => setFiltersOpen(true)}>
+            Filters{filterCount > 0 && ` (${filterCount})`}
+          </Button>
+          <label className="sort-select">
+            <span>Sort by</span>
+            <select className="input" value={params.sort} onChange={(e) => update({ sort: e.target.value as SortKey })}>
+              {(Object.keys(SORT_LABELS) as SortKey[]).map((s) => (
+                <option key={s} value={s}>
+                  {SORT_LABELS[s]}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
       </header>
 
       <div className="search-layout">
         <aside className="search-layout__filters" aria-label="Filters">
-          <div className="filters-head">
-            <h2 className="filters-title">Filters</h2>
-            {filterCount > 0 && (
-              <button type="button" className="link-button" onClick={() => update({ ...DEFAULT_SEARCH, q: params.q, sort: params.sort })}>
-                Reset
-              </button>
-            )}
-          </div>
+          <h2 className="visually-hidden">Filters</h2>
+          <GenreList params={params} onChange={update} />
           <FilterPanel params={params} onChange={update} idPrefix="side" />
+          {filterCount > 0 && (
+            <button type="button" className="link-button filters-reset" onClick={() => update({ ...DEFAULT_SEARCH, q: params.q, sort: params.sort })}>
+              Reset all filters
+            </button>
+          )}
         </aside>
 
         <section className="search-layout__results" aria-labelledby="results-heading">
           <div className="results-toolbar">
-            <div>
-              <h2 id="results-heading" ref={resultsHeadingRef} tabIndex={-1} className="results-count">
-                {data ? `${data.total} ${plural(data.total, 'book')}` : 'Searching…'}
-              </h2>
-              {data && <Freshness at={data.asOf} label="Availability as of" fetching={results.isFetching} />}
-            </div>
-            <div className="results-toolbar__controls">
-              <Button className="filters-toggle" icon="filter" onClick={() => setFiltersOpen(true)}>
-                Filters{filterCount > 0 && ` (${filterCount})`}
-              </Button>
-              <label className="sort-select">
-                <span>Sort</span>
-                <select className="input" value={params.sort} onChange={(e) => update({ sort: e.target.value as SortKey })}>
-                  {(Object.keys(SORT_LABELS) as SortKey[]).map((s) => (
-                    <option key={s} value={s}>
-                      {SORT_LABELS[s]}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
+            <h2 id="results-heading" ref={resultsHeadingRef} tabIndex={-1} className="results-count">
+              {data ? `${data.total} ${plural(data.total, 'book')}` : 'Searching…'}
+            </h2>
+            {data && <Freshness at={data.asOf} label="Availability as of" fetching={results.isFetching} />}
           </div>
 
           <ActiveFilters params={params} onChange={update} onClear={clearAll} />
@@ -223,13 +236,25 @@ export function SearchPage() {
             </EmptyState>
           ) : (
             <>
-              <ul className={`results-grid${results.isPlaceholderData ? ' is-stale' : ''}`} role="list" aria-busy={results.isPlaceholderData}>
-                {data.items.map((book) => (
-                  <li key={book.edition.id}>
-                    <BookCard book={book} previewTo={previewHref(book.edition.id)} />
-                  </li>
-                ))}
-              </ul>
+              {/* Cards glide to their new places when filters change. */}
+              <LayoutGroup>
+                <ul className={`results-grid${results.isPlaceholderData ? ' is-stale' : ''}`} role="list" aria-busy={results.isPlaceholderData}>
+                  <AnimatePresence initial={false} mode="popLayout">
+                    {data.items.map((book, i) => (
+                      <motion.li
+                        key={book.edition.id}
+                        layout
+                        initial={{ opacity: 0, y: 18, scale: 0.98 }}
+                        animate={{ opacity: 1, y: 0, scale: 1, transition: { duration: 0.45, ease: EASE_OUT_EXPO, delay: Math.min(i, 8) * 0.03 } }}
+                        exit={{ opacity: 0, scale: 0.96, transition: { duration: 0.2 } }}
+                        transition={{ layout: { duration: 0.45, ease: EASE_OUT_EXPO } }}
+                      >
+                        <BookCard book={book} previewTo={previewHref(book.edition.id)} tint={(i % 4) + 1} />
+                      </motion.li>
+                    ))}
+                  </AnimatePresence>
+                </ul>
+              </LayoutGroup>
               {data.pageCount > 1 && (
                 <nav className="pagination" aria-label="Pages">
                   {data.page > 1 && (
@@ -280,6 +305,7 @@ export function SearchPage() {
             </>
           }
         >
+          <GenreList params={params} onChange={(patch) => update(patch, { replace: true })} />
           <FilterPanel params={params} onChange={(patch) => update(patch, { replace: true })} idPrefix="drawer" />
         </Dialog>
       )}

@@ -1,36 +1,69 @@
-import { Link, NavLink, Outlet } from 'react-router-dom';
+import { motion, useMotionValueEvent, useScroll } from 'framer-motion';
+import { useRef, useState } from 'react';
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useOnline } from '../../api/ApiContext';
+import { ThemeToggle } from '../../app/theme';
 import { useMemberSession } from '../../session/MemberSession';
 import { Button } from '../../ui/Button';
 import { Icon } from '../../ui/Icon';
+import { EASE_OUT_EXPO } from '../../ui/motion';
+
+function Brand() {
+  return (
+    <Link to="/" className="brand" aria-label="Blurb Books — home">
+      <span className="brand__symbol">
+        <Icon name="book" size={22} />
+      </span>
+      <span className="brand__name">
+        Blurb<span>Books</span>
+      </span>
+    </Link>
+  );
+}
 
 export function KioskLayout() {
   const { session, endSession, lastEnded, dismissEndedNotice } = useMemberSession();
   const online = useOnline();
+  const { pathname } = useLocation();
+  const isLanding = pathname === '/';
+
+  // Header: transparent over the landing hero, solid once scrolled, tucked
+  // away while scrolling down and back as soon as the reader scrolls up.
+  const { scrollY } = useScroll();
+  const [scrolled, setScrolled] = useState(false);
+  const [hidden, setHidden] = useState(false);
+  const last = useRef(0);
+  useMotionValueEvent(scrollY, 'change', (y) => {
+    setScrolled(y > 24);
+    setHidden(y > last.current && y > 320);
+    last.current = y;
+  });
 
   return (
-    <div className="kiosk">
+    <div className={`kiosk${isLanding ? ' kiosk--landing' : ''}`}>
       <a className="skip-link" href="#main">
         Skip to main content
       </a>
-      <header className="site-header">
+      <header
+        className="site-header"
+        data-overlay={isLanding && !scrolled ? 'true' : undefined}
+        data-hidden={hidden ? 'true' : undefined}
+      >
         <div className="container site-header__inner">
-          <Link to="/" className="brand" aria-label="Blurb Books — home">
-            <img src="/images/blurb-logo.jpg" alt="" width={40} height={40} className="brand__logo" />
-            <span className="brand__name">
-              Blurb <span>Books</span>
-            </span>
-          </Link>
+          <Brand />
           <nav aria-label="Primary" className="site-nav">
-            <NavLink to="/explore">Browse</NavLink>
-            <NavLink to="/search">Search</NavLink>
+            <NavLink to="/" end>
+              Discover
+            </NavLink>
+            <NavLink to="/search">The collection</NavLink>
             <NavLink to="/map">Library map</NavLink>
           </nav>
           <div className="site-header__member">
+            <ThemeToggle />
             {session ? (
               <>
                 <NavLink to="/member" className="member-chip">
-                  <Icon name="user" size={18} />
+                  <Icon name="user" size={17} />
                   <span>
                     <span className="visually-hidden">Signed in as </span>
                     {session.name.split(' ')[0]}
@@ -42,56 +75,69 @@ export function KioskLayout() {
               </>
             ) : (
               <NavLink to="/member" className="member-chip">
-                <Icon name="user" size={18} />
-                <span>My library</span>
+                <Icon name="bookmark" size={17} />
+                <span>My bookshelf</span>
               </NavLink>
             )}
           </div>
         </div>
       </header>
 
-      {!online && (
-        <div className="banner banner--offline" role="status">
-          <div className="container banner__inner">
+      <div className="toasts">
+        {!online && (
+          <div className="toast toast--warn" role="status">
             <Icon name="wifiOff" size={18} />
             <span>
-              <strong>Offline.</strong> Showing the last information we loaded. Reserving and saving are paused until the
-              connection returns.
+              <strong>Offline.</strong> Showing the last information we loaded. Reserving and saving are paused.
             </span>
           </div>
-        </div>
-      )}
-      {lastEnded && (
-        <div className="banner banner--ok" role="status">
-          <div className="container banner__inner">
+        )}
+        {lastEnded && (
+          <div className="toast toast--ok" role="status">
             <Icon name="check" size={18} />
             <span>
-              {lastEnded === 'timeout' ? 'Your session timed out' : 'Session ended'} — personal details have been cleared from
-              this screen. You can keep browsing.
+              {lastEnded === 'timeout' ? 'Your session timed out' : 'Session ended'} — personal details have been cleared
+              from this screen. You can keep browsing.
             </span>
             <button type="button" className="icon-button icon-button--sm" onClick={dismissEndedNotice} aria-label="Dismiss">
               <Icon name="close" size={16} />
             </button>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       <main id="main" className="kiosk__main">
-        <Outlet />
+        {/* Enter-only transition: no exit animation, so focus management and
+            scroll restoration never see two pages at once. */}
+        <motion.div
+          key={pathname}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: EASE_OUT_EXPO }}
+        >
+          <Outlet />
+        </motion.div>
       </main>
 
       <footer className="site-footer">
-        <div className="container site-footer__inner">
-          <p>
-            <strong>Demo.</strong> Library data, sign-in and circulation are simulated in this browser.{' '}
-            <Link to="/staff">Librarian workspace</Link>
+        <div className="container site-footer__top">
+          <Brand />
+          <p className="site-footer__motto">
+            A more open world,
+            <br />
+            <em>one book at a time.</em>
           </p>
+          <nav aria-label="Footer" className="site-footer__nav">
+            <Link to="/">Discover</Link>
+            <Link to="/search">The collection</Link>
+            <Link to="/map">Library map</Link>
+            <Link to="/member">My bookshelf</Link>
+          </nav>
+        </div>
+        <div className="container site-footer__inner">
+          <p>© {new Date().getFullYear()} Blurb Books. Made for the love of reading.</p>
           <p>
-            Blurb Books — know more about your books.{' '}
-            <a href="https://www.linkedin.com/in/pragya-rai-5096a21b1" target="_blank" rel="noreferrer">
-              Made by Pragya Rai
-              <span className="visually-hidden"> (opens in a new tab)</span>
-            </a>
+            Demo library — data and sign-in are simulated · <Link to="/staff">Librarian workspace</Link> · Made by Pragya Rai
           </p>
         </div>
       </footer>
