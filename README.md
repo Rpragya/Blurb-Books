@@ -1,6 +1,6 @@
 # Blurb Books
 
-Blurb Books helps visitors find books in a physical library and helps staff run circulation. It is a frontend portfolio project built with React, TypeScript and Vite, running against a typed in-browser mock API.
+Blurb Books helps visitors find books in a physical library and helps staff run circulation. It is a frontend portfolio project built with React, JavaScript and Vite, running against an in-browser mock API.
 
 It has three connected experiences:
 
@@ -17,10 +17,9 @@ Requires Node 20+ and npm.
 ```bash
 npm install
 npm run dev          # http://localhost:5173
-npm run build        # typecheck + production build
+npm run build        # production build
 npm run preview      # serve the build
 npm run lint
-npm run typecheck
 npm test             # Vitest + React Testing Library
 npx playwright install chromium   # once
 npm run test:e2e     # Playwright (starts its own dev server on :4317)
@@ -40,7 +39,7 @@ The demo is built to show this story:
 5. At the desk, go to **Return** and scan `BB000102`. The result says to put it on the hold shelf for Tom.
 6. In **Reservations**, choose **Check out to member** to collect it. To see expiry instead: on *The Wonderful Wizard of Oz*, choose **Expire & pass on** (it passes to Tom), then in **Demo controls** advance **+1 week** (Tom's window lapses and the copy goes to reshelving).
 
-`e2e/story.spec.ts` automates this whole story.
+`e2e/story.spec.js` automates this whole story.
 
 ### Demo accounts
 
@@ -59,18 +58,17 @@ Staff access is a role switch on `/staff`. It is not authentication.
 
 ```
 src/
-  domain/        Types and business rules (pure, framework-free, unit-tested)
-    types.ts           BookEdition vs BookCopy, Loan, Reservation, ReadingSession…
-    circulation.ts     checkout / return / reshelve / renew / reserve / expire / sessions
-    availability.ts    "Two copies available", "All copies on loan", …
-    location.ts        Text directions ("Ground floor → Fiction → Rack F3 → Shelf 2")
-    search.ts          URL ⇄ search-state parsing, relevance scoring
-    invariants.ts      Cross-record consistency checks
-    textStats.ts       Word stats + safe highlighting (ported from the original Blurb)
+  domain/        Business rules (pure, framework-free, unit-tested)
+    circulation.js     checkout / return / reshelve / renew / reserve / expire / sessions
+    availability.js    "Two copies available", "All copies on loan", …
+    location.js        Text directions ("Ground floor → Fiction → Rack F3 → Shelf 2")
+    search.js          URL ⇄ search-state parsing, relevance scoring
+    invariants.js      Cross-record consistency checks
+    textStats.js       Word stats + safe highlighting (ported from the original Blurb)
   api/
-    types.ts           LibraryApi interface + DTOs: the contract the UI depends on
-    ApiContext.tsx     Injects the adapter; online/offline status
-    queries.ts         TanStack Query keys, hooks, mutation wrapper
+    types.js           ApiError + abort helper shared by adapters
+    ApiContext.jsx     Injects the adapter; online/offline status
+    queries.js         TanStack Query keys, hooks, mutation wrapper
     mock/              The in-browser "server": fixtures, seed, floor plan, mockApi
   session/       Member kiosk session (memory only, idle timeout), demo staff role
   app/           Routes (staff chunk lazy-loaded), focus management
@@ -93,7 +91,7 @@ src/
 | Form input, dialog open state, desk receipts | Component state | Kept after recoverable errors. |
 | Demo settings (latency, failures, offline) | `localStorage` | Demo controls only. |
 
-The business rules live in `src/domain/circulation.ts`. The mock adapter runs each mutation as a transaction: clone the state, apply the rule, check the invariants, then commit. Components only call the API and render the eligibility and reasons the API returns. A Django REST backend would replace `createMockApi()` in `src/main.tsx` with an adapter that implements the same `LibraryApi` interface using `fetch`, passing each query's `AbortSignal` through.
+The business rules live in `src/domain/circulation.js`. The mock adapter runs each mutation as a transaction: clone the state, apply the rule, check the invariants, then commit. Components only call the API and render the eligibility and reasons the API returns. A Django REST backend would replace `createMockApi()` in `src/main.jsx` with an adapter that exposes the same methods as the mock, using `fetch`, passing each query's `AbortSignal` through.
 
 ### Circulation rules implemented
 
@@ -129,7 +127,7 @@ The public site follows an editorial reference: full-bleed library photography, 
 
 **Light and dark themes.** Every colour is a semantic token in `src/styles/tokens.css`, defined once for light and once for dark. The theme follows the OS setting until the reader uses the toggle in the header or staff bar. The choice is stored and applied before first paint by an inline script in `index.html`, so there's no flash. Where the View Transitions API exists, the new theme spreads in a circle from the toggle. The accent has two roles, `--accent` for text and `--accent-fill` for solid buttons, so both pass contrast in both themes.
 
-**Motion** (`framer-motion`, primitives in `src/ui/motion.tsx`):
+**Motion** (`framer-motion`, primitives in `src/ui/motion.jsx`):
 - **Landing:** the hero photo moves slower than the page, the headline rises in word by word, and the hero content fades out as you scroll.
 - **Sections:** reveal as they scroll in, with staggered cards and parallax inside the genre photos.
 - **Covers:** follow the pointer with a 3D tilt.
@@ -148,7 +146,7 @@ The demo has 37 editions in 11 genres and 7 languages (English, French, Spanish,
 
 - Previews are labelled. They are either **public-domain excerpts** with their source (verbatim openings of pre-1930 texts), or **original demo text** written for this project (fictional titles such as *Murder at the Mapleford Library*). Synopses and recommendations are original editorial text. *Harry Potter* is in copyright, so no excerpt is shown for it.
 - All dates are relative to a demo clock. When you return after a break, every timestamp shifts by the time you were away, so overdue and pickup states stay meaningful. **Demo controls** can advance the clock and **Reset demo data**.
-- `src/domain/invariants.ts` checks that copy statuses, loans, sessions and holds agree. It runs in tests and after every mutation in dev.
+- `src/domain/invariants.js` checks that copy statuses, loans, sessions and holds agree. It runs in tests and after every mutation in dev.
 
 ## Real vs simulated
 
@@ -167,7 +165,7 @@ The demo has 37 editions in 11 genres and 7 languages (English, French, Spanish,
 
 Run on Linux (Node 24, Chromium headless shell 156) on 25 Oct 2026:
 
-- `npm run lint`, `npm run typecheck` and `npm run build` pass.
+- `npm run lint` and `npm run build` pass.
 - `npm test`: **63 passing**. Domain rules (no double checkout, version conflicts, return → hold, pickup expiry chain, renewal blocks, sessions, idempotent jobs, seed invariants), mock API (abort, idempotency, racing desks, offline), and integration tests on the real routes:
   - filters survive opening a book and pressing Back, with focus restored to the card;
   - direct links to books;
